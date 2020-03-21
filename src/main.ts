@@ -22,13 +22,17 @@ function logGameTime() {
   console.log(`Game Time: ${Game.time}`);
 }
 
-function getCreeps(role: string): Creep[] {
+export function getCreeps(role: string): Creep[] {
   let creeps = _.filter(Game.creeps, (creep) => creep.memory.role == role);
   console.log(`Role:${role}:pop: ${creeps.length}`);
   return creeps;
 }
 
-function spawnCreep(name: string, role: string, body: BodyPartConstant[], spawn: StructureSpawn) {
+export function getSpawn(name: string): StructureSpawn | null {
+  return Game.spawns[name];
+}
+
+export function spawnCreep(name: string, role: string, body: BodyPartConstant[], spawn: StructureSpawn) {
   let newName: string = name + Game.time;
   console.log(`spawn:${spawn.name}:spawning:${role}: ${newName}`);
   spawn.spawnCreep(body, newName,
@@ -45,14 +49,14 @@ export const loop = ErrorMapper.wrapLoop(() => {
   let harvesters: Creep[] = getCreeps('harvester'),
     builders: Creep[] = getCreeps('builder'),
     upgraders: Creep[] = getCreeps('upgrader'),
-    spawn: StructureSpawn | null = Game.spawns['Spawn1'];
+    spawn: StructureSpawn | null = getSpawn('Spawn1');
 
   if (spawn) {
     if (harvesters.length < 2) {
       spawnCreep('Harvester', 'harvester', [WORK, CARRY, MOVE], spawn);
-    } else if (upgraders.length < 1) {
+    } else if (upgraders.length < 2) {
       spawnCreep('Upgrader', 'upgrader', [WORK, CARRY, MOVE], spawn);
-    } else if (builders.length < 1) {
+    } else if (builders.length < 2) {
       spawnCreep('Builder', 'builder', [WORK, CARRY, MOVE], spawn);
     }
 

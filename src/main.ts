@@ -22,6 +22,23 @@ function logGameTime() {
   console.log(`Game Time: ${Game.time}`);
 }
 
+export function findStorageContainers(spawn: StructureSpawn): StructureContainer[] {
+  return <StructureContainer[]>spawn.room.find(FIND_STRUCTURES, {
+    filter: (structure) => {
+      return (structure.structureType == STRUCTURE_CONTAINER &&
+        structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0);
+    }
+  });
+}
+
+export function findTowers(spawn: StructureSpawn): StructureTower[] {
+  return <StructureTower[]>spawn.room.find(FIND_STRUCTURES, {
+    filter: (structure) => {
+      return (structure.structureType == STRUCTURE_TOWER);
+    }
+  })
+}
+
 export function getCreeps(role: string): Creep[] {
   let creeps = _.filter(Game.creeps, (creep) => creep.memory.role == role);
   console.log(`Role:${role}:pop: ${creeps.length}`);
@@ -52,11 +69,16 @@ export const loop = ErrorMapper.wrapLoop(() => {
     spawn: StructureSpawn | null = getSpawn('Spawn1');
 
   if (spawn) {
-    if (harvesters.length < 2) {
+    let containers = findStorageContainers(spawn),
+      harvesterPop = containers.length > 2 ? containers.length : 2,
+      upgraderPop = containers.length > 2 ? 2 : 1,
+      builderPop = containers.length > 2 ? 2 : 1;
+
+    if (harvesters.length < harvesterPop) {
       spawnCreep('Harvester', 'harvester', [WORK, CARRY, MOVE], spawn);
-    } else if (upgraders.length < 2) {
+    } else if (upgraders.length < upgraderPop) {
       spawnCreep('Upgrader', 'upgrader', [WORK, CARRY, MOVE], spawn);
-    } else if (builders.length < 2) {
+    } else if (builders.length < builderPop) {
       spawnCreep('Builder', 'builder', [WORK, CARRY, MOVE], spawn);
     }
 
@@ -68,20 +90,20 @@ export const loop = ErrorMapper.wrapLoop(() => {
         spawn.pos.y,
         { align: 'left', opacity: 0.8 });
     }
-  }
 
-  let tower: StructureTower | null = Game.getObjectById('TOWER_ID');
-  if (tower) {
-    let closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-      filter: (structure) => structure.hits < structure.hitsMax
-    });
-    if (closestDamagedStructure) {
-      tower.repair(closestDamagedStructure);
-    }
+    let tower: StructureTower = findTowers(spawn)[0];
+    if (tower) {
+      let closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+        filter: (structure) => structure.hits < structure.hitsMax
+      });
+      if (closestDamagedStructure) {
+        tower.repair(closestDamagedStructure);
+      }
 
-    let closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-    if (closestHostile) {
-      tower.attack(closestHostile);
+      let closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+      if (closestHostile) {
+        tower.attack(closestHostile);
+      }
     }
   }
 

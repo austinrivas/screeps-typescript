@@ -4,7 +4,8 @@ let roleBuilder = {
 
     findClosestDamagedStructures: function (creep: Creep): Structure | null {
         return creep.pos.findClosestByRange(FIND_STRUCTURES, {
-            filter: (structure) => structure.hits < structure.hitsMax
+            filter: (structure) => structure.hits < structure.hitsMax &&
+                structure.structureType !== STRUCTURE_WALL
         });
     },
 

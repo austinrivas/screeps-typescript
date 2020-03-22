@@ -94,7 +94,8 @@ export const loop = ErrorMapper.wrapLoop(() => {
     let tower: StructureTower = findTowers(spawn)[0];
     if (tower) {
       let closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-        filter: (structure) => structure.hits < structure.hitsMax
+        filter: (structure) => structure.hits < structure.hitsMax &&
+          structure.structureType !== STRUCTURE_WALL
       });
       if (closestDamagedStructure) {
         tower.repair(closestDamagedStructure);

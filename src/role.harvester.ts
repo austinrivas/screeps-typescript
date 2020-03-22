@@ -38,10 +38,11 @@ let roleHarvester = {
 
     run: function (creep: Creep): void {
         let containerAtLocation = this.getContainerAtLocation(creep),
-            storageStructures = this.findStorageStructure(creep);
+            storageStructures = this.findStorageStructure(creep),
+            containers = []
         if (creep.store.getFreeCapacity() > 0) {
             if (storageStructures.length) {
-                let containers = _.sortBy(this.findStorageContainers(creep), (c: StructureContainer) => {
+                containers = _.sortBy(this.findStorageContainers(creep), (c: StructureContainer) => {
                     return c.store.getFreeCapacity()
                 });
 
@@ -60,8 +61,17 @@ let roleHarvester = {
             if (containerAtLocation && storageStructures.length == 0) {
                 this.harvestResource(creep);
             } else {
+                containers = _.sortBy(this.findStorageContainers(creep), (c: StructureContainer) => {
+                    return -c.store.getFreeCapacity()
+                });
+
                 if (storageStructures.length > 0) {
                     this.transferEnergyToStorage(creep, storageStructures[0]);
+                } else if (containers.length) {
+                    let container = containers[0];
+                    if (creep.transfer(container, RESOURCE_ENERGY, creep.store.getUsedCapacity()) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(container, pathStyle)
+                    }
                 } else {
                     this.harvestResource(creep);
                 }

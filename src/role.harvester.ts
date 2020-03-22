@@ -76,9 +76,7 @@ let roleHarvester = {
                     this.transferEnergyToStorage(creep, storageStructures[0]);
                 } else if (containers.length) {
                     let container = containers[0];
-                    if (creep.transfer(container, RESOURCE_ENERGY, creep.store.getUsedCapacity()) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(container, pathStyle)
-                    }
+                    creep.moveTo(container, pathStyle);
                 } else {
                     this.harvestResource(creep);
                 }

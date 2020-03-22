@@ -1,3 +1,5 @@
+const pathStyle = { visualizePathStyle: { stroke: '#ffaa00' } };
+
 let roleHarvester = {
     getContainerAtLocation: function (creep: Creep): Structure | null {
         let structures: Structure[] = creep.pos.lookFor(LOOK_STRUCTURES).filter((structure) => {
@@ -18,6 +20,15 @@ let roleHarvester = {
         });
     },
 
+    findStorageContainers: function (creep: Creep): Structure[] {
+        return creep.room.find(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return (structure.structureType == STRUCTURE_CONTAINER &&
+                    structure.store.getUsedCapacity(RESOURCE_ENERGY) > 50);
+            }
+        });
+    },
+
     harvestResource: function (creep: Creep): void {
         let sources = creep.room.find(FIND_SOURCES);
         if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
@@ -26,12 +37,27 @@ let roleHarvester = {
     },
 
     run: function (creep: Creep): void {
+        let containerAtLocation = this.getContainerAtLocation(creep),
+            storageStructures = this.findStorageStructure(creep);
         if (creep.store.getFreeCapacity() > 0) {
-            this.harvestResource(creep);
+            if (storageStructures.length) {
+                let containers = _.sortBy(this.findStorageContainers(creep), (c: StructureContainer) => {
+                    return c.store.getFreeCapacity()
+                });
+
+                if (containers.length) {
+                    let container = containers[0];
+                    if (creep.withdraw(container, RESOURCE_ENERGY, creep.store.getFreeCapacity()) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(container, pathStyle)
+                    }
+                } else {
+                    this.harvestResource(creep);
+                }
+            } else {
+                this.harvestResource(creep);
+            }
         } else {
-            let container = this.getContainerAtLocation(creep),
-                storageStructures = this.findStorageStructure(creep);
-            if (container && storageStructures.length == 0) {
+            if (containerAtLocation && storageStructures.length == 0) {
                 this.harvestResource(creep);
             } else {
                 if (storageStructures.length > 0) {

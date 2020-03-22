@@ -13,7 +13,7 @@ let roleBuilder = {
         return creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType == STRUCTURE_CONTAINER &&
-                    structure.store.getUsedCapacity(RESOURCE_ENERGY) > 50);
+                    structure.store.getUsedCapacity(RESOURCE_ENERGY) >= 50);
             }
         });
     },

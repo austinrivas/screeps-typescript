@@ -6,7 +6,7 @@ let roleUpgrader = {
         return creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType == STRUCTURE_CONTAINER &&
-                    structure.store.getUsedCapacity(RESOURCE_ENERGY) > 50);
+                    structure.store.getUsedCapacity(RESOURCE_ENERGY) >= 50);
             }
         });
     },
@@ -30,7 +30,7 @@ let roleUpgrader = {
             }
         } else {
             let containers = _.sortBy(this.findStorageContainers(creep), (c: StructureContainer) => {
-                return c.store.getFreeCapacity()
+                return c.store.getFreeCapacity();
             });
 
             if (containers.length) {

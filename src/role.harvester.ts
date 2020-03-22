@@ -29,6 +29,15 @@ let roleHarvester = {
         });
     },
 
+    findUnoccupiedStorageContainers: function (creep: Creep): Structure[] {
+        return creep.room.find(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return (structure.structureType == STRUCTURE_CONTAINER &&
+                    !structure.pos.lookFor(LOOK_CREEPS).length);
+            }
+        });
+    },
+
     harvestResource: function (creep: Creep): void {
         let sources = creep.room.find(FIND_SOURCES);
         if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
@@ -61,9 +70,7 @@ let roleHarvester = {
             if (containerAtLocation && storageStructures.length == 0) {
                 this.harvestResource(creep);
             } else {
-                containers = _.sortBy(this.findStorageContainers(creep), (c: StructureContainer) => {
-                    return -c.store.getFreeCapacity()
-                });
+                containers = this.findUnoccupiedStorageContainers(creep);
 
                 if (storageStructures.length > 0) {
                     this.transferEnergyToStorage(creep, storageStructures[0]);
